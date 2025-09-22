@@ -3,37 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <meta name="description" content="七连翻计分板 - 横屏使用，按钮布局优化">
+  <meta name="description" content="七连翻计分板 - 支持横竖屏，含删除玩家功能">
   <title>七连翻计分板</title>
   <style>
     * {
       box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      margin: 0;
-      padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background-color: #f7f7f7;
       color: #333;
-      height: 100vh;
-      overflow: hidden;
-    }
-
-    /* ========== 横屏模式 ========== */
-    #landscape-mode {
-      display: none;
-      flex-direction: column;
-      width: 100%;
-      height: 100%;
-      padding: 10px;
+      min-height: 100vh;
+      padding: 8px;
     }
 
     h1 {
       text-align: center;
       color: #2c3e50;
-      margin: 0 0 10px;
-      font-size: 1.4em;
+      margin: 0 0 12px;
+      font-size: 1.5em;
     }
 
     table {
@@ -43,7 +34,7 @@
       border-radius: 8px;
       overflow: hidden;
       box-shadow: 0 2px 12px rgba(0,0,0,0.1);
-      flex: 1;
+      margin-bottom: 12px;
     }
 
     th, td {
@@ -77,14 +68,17 @@
     }
 
     .action-btn {
+      display: block;
+      width: 90%;
+      max-width: 300px;
       margin: 8px auto;
-      padding: 10px 20px;
+      padding: 12px 0;
       font-size: 16px;
       border: none;
       border-radius: 6px;
       cursor: pointer;
-      width: 80%;
       font-weight: bold;
+      text-align: center;
     }
 
     .add-row-btn {
@@ -102,6 +96,11 @@
       color: white;
     }
 
+    .delete-player-btn {
+      background-color: #9c27b0;
+      color: white;
+    }
+
     /* ========== 竖屏提示 ========== */
     #portrait-tip {
       display: flex;
@@ -109,58 +108,71 @@
       justify-content: center;
       align-items: center;
       text-align: center;
-      height: 100vh;
-      background-color: #f7f7f7;
-      color: #555;
       padding: 20px;
+      background-color: #fff8e1;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      margin: 10px auto;
+      max-width: 400px;
     }
 
     #portrait-tip img {
-      width: 100px;
-      height: 100px;
+      width: 80px;
+      height: 80px;
       opacity: 0.8;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
 
     #portrait-tip h2 {
       color: #d32f2f;
-      margin-bottom: 10px;
-      font-size: 1.5em;
+      margin-bottom: 8px;
+      font-size: 1.3em;
     }
 
     #portrait-tip p {
-      font-size: 17px;
-      line-height: 1.6;
+      font-size: 15px;
+      color: #555;
+      line-height: 1.5;
+    }
+
+    #portrait-tip button {
+      margin-top: 12px;
+      padding: 8px 16px;
+      background: #757575;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
 
-  <!-- 横屏：计分板 -->
-  <div id="landscape-mode">
-    <h1>🎲 七连翻计分板</h1>
-    <table id="scoreTable">
-      <thead>
-        <tr id="headerRow"></tr>
-      </thead>
-      <tbody id="scoreBody"></tbody>
-    </table>
-    
-    <!-- 按钮顺序：高频 → 低频 -->
-    <button class="action-btn add-row-btn" onclick="addScoreRow()">+ 新增一局</button>
-    <button class="action-btn reset-btn" onclick="resetScores()">🔁 清空分数，保留玩家</button>
-    <button class="action-btn add-player-btn" onclick="addPlayer()">+ 添加玩家</button>
-  </div>
-
-  <!-- 竖屏：提示旋转 -->
+  <!-- 竖屏提示 -->
   <div id="portrait-tip">
     <img src="https://cdn-icons-png.flaticon.com/512/184/184993.png" alt="请旋转手机">
-    <h2>请横屏使用</h2>
-    <p>本计分板为横屏优化，<br>请将手机向左或向右旋转90°</p>
+    <h2>建议横屏使用</h2>
+    <p>横屏体验更佳，表格更清晰<br>也可继续使用竖屏模式</p>
+    <button onclick="this.parentElement.remove()">继续使用竖屏</button>
   </div>
 
+  <!-- 主内容 -->
+  <h1>🎲 七连翻计分板</h1>
+  <table id="scoreTable">
+    <thead>
+      <tr id="headerRow"></tr>
+    </thead>
+    <tbody id="scoreBody"></tbody>
+  </table>
+
+  <button class="action-btn add-row-btn" onclick="addScoreRow()">+ 新增一局</button>
+  <button class="action-btn reset-btn" onclick="resetScores()">🔁 清空分数，保留玩家</button>
+  <button class="action-btn add-player-btn" onclick="addPlayer()">+ 添加玩家</button>
+  <button class="action-btn delete-player-btn" onclick="deleteLastPlayer()">❌ 删除最后一位玩家</button>
+
   <script>
-    const STORAGE_KEY = 'qilianfan_scores_simple';
+    const STORAGE_KEY = 'qilianfan_scores_v3';
     let gameData = {
       players: ['玩家1', '玩家2'],
       scores: []
@@ -289,7 +301,21 @@
       render();
     }
 
-    // 仅清空分数和局数，保留玩家名
+    // 🔴 新增：删除最后一位玩家
+    function deleteLastPlayer() {
+      if (gameData.players.length <= 2) {
+        alert('至少保留 2 位玩家哦～');
+        return;
+      }
+
+      if (confirm(`⚠️ 确定要删除最后一位玩家「${gameData.players[gameData.players.length - 1]}」吗？`)) {
+        gameData.players.pop(); // 删除玩家
+        gameData.scores.forEach(row => row.pop()); // 删除对应分数
+        saveToStorage();
+        render();
+      }
+    }
+
     function resetScores() {
       if (confirm('⚠️ 确定要清空所有分数和局数吗？\n玩家姓名将保留')) {
         gameData.scores = [];
@@ -304,28 +330,24 @@
       renderScoreRows();
     }
 
-    // 检测方向
-    function checkOrientation() {
-      const isLandscape = window.innerWidth > window.innerHeight;
-      document.getElementById('landscape-mode').style.display = isLandscape ? 'flex' : 'none';
-      document.getElementById('portrait-tip').style.display = isLandscape ? 'none' : 'flex';
-    }
-
     // 初始化
     window.addEventListener('load', () => {
       loadFromStorage();
-      checkOrientation();
       render();
       if (gameData.scores.length === 0) {
         addScoreRow();
       }
-    });
 
-    // 监听方向变化
-    window.addEventListener('orientationchange', () => {
-      setTimeout(checkOrientation, 300);
+      // 3秒后自动隐藏提示
+      setTimeout(() => {
+        const tip = document.getElementById('portrait-tip');
+        if (tip) {
+          tip.style.opacity = '0';
+          tip.style.transition = 'opacity 0.5s';
+          setTimeout(() => tip.remove(), 500);
+        }
+      }, 3000);
     });
-    window.addEventListener('resize', checkOrientation);
   </script>
 </body>
 </html>
