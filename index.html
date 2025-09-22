@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>七连翻计分板</title>
   <style>
     body {
@@ -10,105 +10,157 @@
       padding: 20px;
       background-color: #f7f7f7;
       color: #333;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
+
     h1 {
       text-align: center;
       color: #2c3e50;
+      margin-top: 10px;
     }
+
+    /* 横屏时显示表格 */
+    #landscape-mode {
+      display: none;
+      width: 100%;
+    }
+
+    #landscape-mode.active {
+      display: flex;
+      flex-direction: column;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
+      margin-top: 10px;
       background-color: white;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      flex: 1;
     }
+
     th, td {
-      border: 1px solid #ddd;
-      padding: 10px;
+      padding: 12px 8px;
       text-align: center;
     }
+
     th {
       background-color: #4CAF50;
       color: white;
-      position: sticky;
-      top: 0;
+      font-weight: bold;
     }
+
     td input {
       width: 90%;
-      padding: 6px;
+      padding: 8px;
       border: 1px solid #ccc;
-      border-radius: 4px;
+      border-radius: 6px;
       text-align: center;
+      font-size: 16px;
     }
+
     .player-name {
       font-weight: bold;
-      background-color: #f0f0f0;
+      background-color: #f0f5f0;
     }
+
     .total-row {
       background-color: #e8f5e8;
       font-weight: bold;
     }
+
     .add-row-btn {
-      display: block;
-      margin: 20px auto;
-      padding: 10px 20px;
+      margin: 16px auto;
+      padding: 12px 24px;
       font-size: 16px;
       background-color: #4CAF50;
       color: white;
       border: none;
-      border-radius: 4px;
+      border-radius: 6px;
       cursor: pointer;
+      width: 80%;
     }
-    .add-row-btn:hover {
-      background-color: #45a049;
-    }
-    .empty-tip {
-      text-align: center;
-      color: #999;
-      margin: 40px 0;
-      font-style: italic;
-    }
+
     .add-player {
       width: 90%;
-      padding: 8px;
-      margin: 5px 0;
+      padding: 10px;
+      margin: 8px 0;
       border: 1px dashed #4CAF50;
       text-align: center;
       color: #4CAF50;
       background: none;
       cursor: pointer;
+      font-size: 16px;
+    }
+
+    /* 竖屏提示 */
+    #portrait-tip {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      height: 100vh;
+      background-color: #f7f7f7;
+      color: #555;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    #portrait-tip img {
+      width: 120px;
+      height: 120px;
+      margin-bottom: 20px;
+      opacity: 0.7;
+    }
+
+    #portrait-tip h2 {
+      color: #d32f2f;
+      margin-bottom: 10px;
+    }
+
+    #portrait-tip p {
+      font-size: 18px;
+      line-height: 1.6;
     }
   </style>
 </head>
 <body>
-  <h1>🎲 七连翻计分板</h1>
+  <!-- 横屏模式：计分板 -->
+  <div id="landscape-mode">
+    <h1>🎲 七连翻计分板</h1>
+    <table id="scoreTable">
+      <thead>
+        <tr id="headerRow"></tr>
+      </thead>
+      <tbody id="scoreBody"></tbody>
+    </table>
+    <button class="add-row-btn" onclick="addScoreRow()">+ 新增一局</button>
+  </div>
 
-  <table id="scoreTable">
-    <thead>
-      <tr id="headerRow"></tr>
-    </thead>
-    <tbody id="scoreBody"></tbody>
-  </table>
-
-  <button class="add-row-btn" onclick="addScoreRow()">+ 新增一局</button>
+  <!-- 竖屏模式：提示旋转 -->
+  <div id="portrait-tip">
+    <img src="https://cdn-icons-png.flaticon.com/512/184/184993.png" alt="请旋转手机" />
+    <h2>请旋转手机</h2>
+    <p>为了更好的体验，请将手机横屏使用本计分板。</p>
+    <p>横向屏幕可显示更多玩家和分数，方便多人游戏！</p>
+  </div>
 
   <script>
-    // 存储键名
-    const STORAGE_KEY = 'qilianfan_scores_v1';
-
-    // 默认数据结构
+    const STORAGE_KEY = 'qilianfan_scores_v2';
     let gameData = {
-      players: ['玩家1', '玩家2'], // 默认两个玩家
-      scores: [] // 每行得分，scores[i][j] 表示第i局第j个玩家的得分
+      players: ['玩家1', '玩家2'],
+      scores: []
     };
 
-    // 从 localStorage 加载数据
     function loadFromStorage() {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
-          // 验证数据结构
           if (parsed.players && Array.isArray(parsed.players) && parsed.scores && Array.isArray(parsed.scores)) {
             gameData = parsed;
           }
@@ -118,16 +170,13 @@
       }
     }
 
-    // 保存到 localStorage
     function saveToStorage() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(gameData));
     }
 
-    // 渲染表头（玩家列）
     function renderHeader() {
       const headerRow = document.getElementById('headerRow');
       headerRow.innerHTML = '<th>局数</th>';
-      
       gameData.players.forEach((name, index) => {
         const th = document.createElement('th');
         const input = document.createElement('input');
@@ -145,33 +194,30 @@
       });
     }
 
-    // 渲染所有得分行
     function renderScoreRows() {
       const tbody = document.getElementById('scoreBody');
       tbody.innerHTML = '';
 
-      // 渲染每一局的得分
+      // 渲染每一局
       gameData.scores.forEach((row, rowIndex) => {
         const tr = document.createElement('tr');
-        
-        // 局数列
         const roundTd = document.createElement('td');
         roundTd.textContent = `第${rowIndex + 1}局`;
         tr.appendChild(roundTd);
 
-        // 每个玩家的得分输入框
         gameData.players.forEach((player, playerIndex) => {
           const td = document.createElement('td');
           const input = document.createElement('input');
           input.type = 'number';
+          input.inputMode = 'numeric'; // 弹出数字键盘
           input.value = row[playerIndex] !== undefined ? row[playerIndex] : '';
           input.dataset.row = rowIndex;
           input.dataset.col = playerIndex;
           input.addEventListener('change', function() {
-            const row = parseInt(this.dataset.row);
-            const col = parseInt(this.dataset.col);
+            const rowIdx = parseInt(this.dataset.row);
+            const colIdx = parseInt(this.dataset.col);
             const value = this.value.trim();
-            gameData.scores[row][col] = value ? parseInt(value) || 0 : 0;
+            gameData.scores[rowIdx][colIdx] = value ? parseInt(value) || 0 : 0;
             saveToStorage();
             updateTotalRow();
           });
@@ -182,7 +228,7 @@
         tbody.appendChild(tr);
       });
 
-      // 添加“添加玩家”按钮行
+      // 添加玩家按钮行
       const addPlayerTr = document.createElement('tr');
       const addPlayerTd = document.createElement('td');
       addPlayerTd.colSpan = gameData.players.length + 1;
@@ -198,17 +244,15 @@
       renderTotalRow();
     }
 
-    // 渲染总分行
     function renderTotalRow() {
       const tbody = document.getElementById('scoreBody');
       const totalTr = document.createElement('tr');
       totalTr.className = 'total-row';
-      
+
       const totalTd = document.createElement('td');
       totalTd.textContent = '总分';
       totalTr.appendChild(totalTd);
 
-      // 计算每个玩家的总分
       gameData.players.forEach((player, playerIndex) => {
         const td = document.createElement('td');
         const total = gameData.scores.reduce((sum, row) => {
@@ -222,12 +266,9 @@
       tbody.appendChild(totalTr);
     }
 
-    // 更新总分行（不重新渲染整个表格）
     function updateTotalRow() {
       const rows = document.getElementById('scoreBody').children;
-      const totalTr = rows[rows.length - 1]; // 最后一行是总分行
-      
-      // 更新每个玩家的总分
+      const totalTr = rows[rows.length - 1];
       gameData.players.forEach((player, playerIndex) => {
         const total = gameData.scores.reduce((sum, row) => {
           const score = row[playerIndex];
@@ -237,7 +278,6 @@
       });
     }
 
-    // 新增一局得分
     function addScoreRow() {
       const newRow = new Array(gameData.players.length).fill('');
       gameData.scores.push(newRow);
@@ -245,39 +285,40 @@
       render();
     }
 
-    // 新增玩家
     function addPlayer() {
       const newPlayerName = `玩家${gameData.players.length + 1}`;
       gameData.players.push(newPlayerName);
-      
-      // 为已有局数添加新玩家的得分位
-      gameData.scores.forEach(row => {
-        row.push('');
-      });
-
+      gameData.scores.forEach(row => row.push(''));
       saveToStorage();
       render();
     }
 
-    // 主渲染函数
     function render() {
       renderHeader();
       renderScoreRows();
     }
 
-    // 初始化
-    function init() {
-      loadFromStorage();
-      render();
-
-      // 如果没有数据，初始化默认
-      if (gameData.scores.length === 0) {
-        addScoreRow(); // 默认添加一局
-      }
+    // 检测方向
+    function checkOrientation() {
+      const isLandscape = window.innerWidth > window.innerHeight;
+      document.getElementById('landscape-mode').classList.toggle('active', isLandscape);
+      document.getElementById('portrait-tip').style.display = isLandscape ? 'none' : 'flex';
     }
 
-    // 页面加载完成
-    window.addEventListener('load', init);
+    window.addEventListener('load', () => {
+      loadFromStorage();
+      checkOrientation(); // 初始化检测
+      render();
+      if (gameData.scores.length === 0) {
+        addScoreRow();
+      }
+    });
+
+    // 监听方向变化
+    window.addEventListener('orientationchange', () => {
+      setTimeout(checkOrientation, 300); // 延迟确保尺寸已更新
+    });
+    window.addEventListener('resize', checkOrientation);
   </script>
 </body>
 </html>
