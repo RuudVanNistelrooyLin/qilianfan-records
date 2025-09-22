@@ -3,47 +3,51 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="description" content="七连翻计分板 - 横屏使用，按钮布局优化">
   <title>七连翻计分板</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      padding: 20px;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background-color: #f7f7f7;
       color: #333;
-      margin: 0;
       height: 100vh;
-      display: flex;
+      overflow: hidden;
+    }
+
+    /* ========== 横屏模式 ========== */
+    #landscape-mode {
+      display: none;
       flex-direction: column;
+      width: 100%;
+      height: 100%;
+      padding: 10px;
     }
 
     h1 {
       text-align: center;
       color: #2c3e50;
-      margin-top: 10px;
-    }
-
-    /* 横屏时显示表格 */
-    #landscape-mode {
-      display: none;
-      width: 100%;
-    }
-
-    #landscape-mode.active {
-      display: flex;
-      flex-direction: column;
+      margin: 0 0 10px;
+      font-size: 1.4em;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 10px;
-      background-color: white;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
       flex: 1;
     }
 
     th, td {
-      padding: 12px 8px;
+      padding: 10px 6px;
       text-align: center;
     }
 
@@ -54,12 +58,12 @@
     }
 
     td input {
-      width: 90%;
-      padding: 8px;
-      border: 1px solid #ccc;
+      width: 85%;
+      padding: 6px;
+      border: 1px solid #ddd;
       border-radius: 6px;
       text-align: center;
-      font-size: 16px;
+      font-size: 15px;
     }
 
     .player-name {
@@ -72,31 +76,33 @@
       font-weight: bold;
     }
 
-    .add-row-btn {
-      margin: 16px auto;
-      padding: 12px 24px;
+    .action-btn {
+      margin: 8px auto;
+      padding: 10px 20px;
       font-size: 16px;
-      background-color: #4CAF50;
-      color: white;
       border: none;
       border-radius: 6px;
       cursor: pointer;
       width: 80%;
+      font-weight: bold;
     }
 
-    .add-player {
-      width: 90%;
-      padding: 10px;
-      margin: 8px 0;
-      border: 1px dashed #4CAF50;
-      text-align: center;
-      color: #4CAF50;
-      background: none;
-      cursor: pointer;
-      font-size: 16px;
+    .add-row-btn {
+      background-color: #4CAF50;
+      color: white;
     }
 
-    /* 竖屏提示 */
+    .reset-btn {
+      background-color: #d32f2f;
+      color: white;
+    }
+
+    .add-player-btn {
+      background-color: #2196F3;
+      color: white;
+    }
+
+    /* ========== 竖屏提示 ========== */
     #portrait-tip {
       display: flex;
       flex-direction: column;
@@ -107,29 +113,30 @@
       background-color: #f7f7f7;
       color: #555;
       padding: 20px;
-      box-sizing: border-box;
     }
 
     #portrait-tip img {
-      width: 120px;
-      height: 120px;
-      margin-bottom: 20px;
-      opacity: 0.7;
+      width: 100px;
+      height: 100px;
+      opacity: 0.8;
+      margin-bottom: 16px;
     }
 
     #portrait-tip h2 {
       color: #d32f2f;
       margin-bottom: 10px;
+      font-size: 1.5em;
     }
 
     #portrait-tip p {
-      font-size: 18px;
+      font-size: 17px;
       line-height: 1.6;
     }
   </style>
 </head>
 <body>
-  <!-- 横屏模式：计分板 -->
+
+  <!-- 横屏：计分板 -->
   <div id="landscape-mode">
     <h1>🎲 七连翻计分板</h1>
     <table id="scoreTable">
@@ -138,19 +145,22 @@
       </thead>
       <tbody id="scoreBody"></tbody>
     </table>
-    <button class="add-row-btn" onclick="addScoreRow()">+ 新增一局</button>
+    
+    <!-- 按钮顺序：高频 → 低频 -->
+    <button class="action-btn add-row-btn" onclick="addScoreRow()">+ 新增一局</button>
+    <button class="action-btn reset-btn" onclick="resetScores()">🔁 清空分数，保留玩家</button>
+    <button class="action-btn add-player-btn" onclick="addPlayer()">+ 添加玩家</button>
   </div>
 
-  <!-- 竖屏模式：提示旋转 -->
+  <!-- 竖屏：提示旋转 -->
   <div id="portrait-tip">
-    <img src="https://cdn-icons-png.flaticon.com/512/184/184993.png" alt="请旋转手机" />
-    <h2>请旋转手机</h2>
-    <p>为了更好的体验，请将手机横屏使用本计分板。</p>
-    <p>横向屏幕可显示更多玩家和分数，方便多人游戏！</p>
+    <img src="https://cdn-icons-png.flaticon.com/512/184/184993.png" alt="请旋转手机">
+    <h2>请横屏使用</h2>
+    <p>本计分板为横屏优化，<br>请将手机向左或向右旋转90°</p>
   </div>
 
   <script>
-    const STORAGE_KEY = 'qilianfan_scores_v2';
+    const STORAGE_KEY = 'qilianfan_scores_simple';
     let gameData = {
       players: ['玩家1', '玩家2'],
       scores: []
@@ -165,7 +175,7 @@
             gameData = parsed;
           }
         } catch (e) {
-          console.warn('Failed to parse saved data', e);
+          console.warn('解析失败', e);
         }
       }
     }
@@ -198,7 +208,6 @@
       const tbody = document.getElementById('scoreBody');
       tbody.innerHTML = '';
 
-      // 渲染每一局
       gameData.scores.forEach((row, rowIndex) => {
         const tr = document.createElement('tr');
         const roundTd = document.createElement('td');
@@ -209,7 +218,7 @@
           const td = document.createElement('td');
           const input = document.createElement('input');
           input.type = 'number';
-          input.inputMode = 'numeric'; // 弹出数字键盘
+          input.inputMode = 'numeric';
           input.value = row[playerIndex] !== undefined ? row[playerIndex] : '';
           input.dataset.row = rowIndex;
           input.dataset.col = playerIndex;
@@ -228,19 +237,6 @@
         tbody.appendChild(tr);
       });
 
-      // 添加玩家按钮行
-      const addPlayerTr = document.createElement('tr');
-      const addPlayerTd = document.createElement('td');
-      addPlayerTd.colSpan = gameData.players.length + 1;
-      const addPlayerBtn = document.createElement('button');
-      addPlayerBtn.textContent = '+ 添加玩家';
-      addPlayerBtn.className = 'add-player';
-      addPlayerBtn.onclick = addPlayer;
-      addPlayerTd.appendChild(addPlayerBtn);
-      addPlayerTr.appendChild(addPlayerTd);
-      tbody.appendChild(addPlayerTr);
-
-      // 渲染总分行
       renderTotalRow();
     }
 
@@ -293,6 +289,16 @@
       render();
     }
 
+    // 仅清空分数和局数，保留玩家名
+    function resetScores() {
+      if (confirm('⚠️ 确定要清空所有分数和局数吗？\n玩家姓名将保留')) {
+        gameData.scores = [];
+        saveToStorage();
+        addScoreRow();
+        render();
+      }
+    }
+
     function render() {
       renderHeader();
       renderScoreRows();
@@ -301,13 +307,14 @@
     // 检测方向
     function checkOrientation() {
       const isLandscape = window.innerWidth > window.innerHeight;
-      document.getElementById('landscape-mode').classList.toggle('active', isLandscape);
+      document.getElementById('landscape-mode').style.display = isLandscape ? 'flex' : 'none';
       document.getElementById('portrait-tip').style.display = isLandscape ? 'none' : 'flex';
     }
 
+    // 初始化
     window.addEventListener('load', () => {
       loadFromStorage();
-      checkOrientation(); // 初始化检测
+      checkOrientation();
       render();
       if (gameData.scores.length === 0) {
         addScoreRow();
@@ -316,7 +323,7 @@
 
     // 监听方向变化
     window.addEventListener('orientationchange', () => {
-      setTimeout(checkOrientation, 300); // 延迟确保尺寸已更新
+      setTimeout(checkOrientation, 300);
     });
     window.addEventListener('resize', checkOrientation);
   </script>
